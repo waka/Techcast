@@ -1,0 +1,96 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
+        //noinspection GradleDynamicVersion
+        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.+'
+    }
+}
+
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+}
+
+apply plugin: 'android-sdk-manager'
+apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        applicationId "waka.techcast"
+        minSdkVersion 21
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    def hasReleaseAuthority = new File("${rootDir}/app/release.jks").exists()
+    if (hasReleaseAuthority) {
+        signingConfigs {
+            release {
+                storeFile file('release.jks')
+                storePassword STORE_PASSWORD
+                keyAlias KEY_ALIAS
+                keyPassword KEY_PASSWORD
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+            shrinkResources false
+        }
+        if (hasReleaseAuthority) {
+            release {
+                debuggable false
+                minifyEnabled true
+                proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'ic_launcher.png'
+    }
+}
+
+dependencies {
+    //noinspection GradleDynamicVersion
+    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.0'
+    compile 'com.android.support:cardview-v7:21.0.0'
+    compile('com.jakewharton:butterknife:6.0.0') {
+        exclude module: 'javax.annotation.processing'
+    }
+    compile 'io.reactivex:rxandroid:0.23.0'
+    compile 'com.google.code.gson:gson:2.3'
+    compile 'com.google.dagger:dagger:2.0-SNAPSHOT'
+    compile('com.google.dagger:dagger-compiler:2.0-SNAPSHOT') {
+        exclude module: 'javax.annotation.processing'
+    }
+    provided 'org.glassfish:javax.annotation:10.0-b28'
+
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}

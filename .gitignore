@@ -1,0 +1,17 @@
+.DS_Store
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Android Studio files
+/build
+*/build
+gradle.properties
+release.jks
+
+# Intellij project files
+/.idea
+*.iml
+
+# gradle cache
+.gradle
