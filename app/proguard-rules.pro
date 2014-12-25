@@ -41,3 +41,18 @@
 	@com.google.inject.Inject <fields>;
 	@javax.annotation.Nullable <fields>;
 }
+
+# Gson
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class sun.misc.Unsafe { *; }
+
+# Retrofit
+-dontwarn com.squareup.okhttp.**
+-dontwarn com.google.appengine.api.urlfetch.*
+
+# OkHttp
+-keep class com.squareup.okhttp.** { *; }
+-keep interface com.squareup.okhttp.** { *; }
+-dontwarn java.nio.file.*
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement

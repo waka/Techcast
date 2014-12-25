@@ -1,7 +1,6 @@
 package waka.techcast.enums;
 
-import com.google.common.collect.Lists;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,7 +43,7 @@ public enum ChannelEnum {
     }
 
     public static List<ChannelEnum> toList() {
-        List<ChannelEnum> items = Lists.newArrayList();
+        List<ChannelEnum> items = new ArrayList<>();
         Collections.addAll(items, values());
         return items;
     }
