@@ -8,7 +8,6 @@ import android.view.MenuItem;
 import waka.techcast.R;
 
 public class SettingsActivity extends ActionBarActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

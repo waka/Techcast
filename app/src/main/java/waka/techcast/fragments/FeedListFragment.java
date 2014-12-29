@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,15 +13,16 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import rx.functions.Action1;
 import waka.techcast.internal.di.Injector;
 import waka.techcast.R;
 import waka.techcast.enums.ChannelEnum;
+import waka.techcast.models.Feed;
 import waka.techcast.view_models.FeedListViewModel;
 import waka.techcast.views.adapters.FeedListAdapter;
 
 public class FeedListFragment extends Fragment {
-
-    private static String CHANNEL_KEY = "channel";
+    private static final String CHANNEL_KEY = "channel";
 
     @Inject
     FeedListViewModel viewModel;
@@ -81,6 +83,10 @@ public class FeedListFragment extends Fragment {
     }
 
     private void getFeedList() {
-        viewModel.getFeedList();
+        viewModel.getFeedList().subscribe(new Action1<Feed>() {
+            @Override
+            public void call(Feed feed) {
+            }
+        });
     }
 }

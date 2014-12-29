@@ -5,8 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 public enum ChannelEnum {
-    REBUILD(0, "Rebuild", ""),
-    MOSAICFM(1, "MosaicFM", "");
+    REBUILD(0, "Rebuild", "http://feeds.rebuild.fm/rebuildfm"),
+    MOSAICFM(1, "mosaic.fm", "http://feeds.feedburner.com/mozaicfm"),
+    ANDROID_DEVELOPER_BACKSTAGE(2, "Android Developer Backstage", "http://feeds.feedburner.com/blogspot/AndroidDevelopersBackstage");
 
     private final int id;
     private final String title;

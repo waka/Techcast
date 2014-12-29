@@ -47,10 +47,6 @@
 -keepattributes *Annotation*
 -keep class sun.misc.Unsafe { *; }
 
-# Retrofit
--dontwarn com.squareup.okhttp.**
--dontwarn com.google.appengine.api.urlfetch.*
-
 # OkHttp
 -keep class com.squareup.okhttp.** { *; }
 -keep interface com.squareup.okhttp.** { *; }

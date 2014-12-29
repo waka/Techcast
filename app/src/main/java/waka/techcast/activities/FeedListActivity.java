@@ -14,7 +14,6 @@ import waka.techcast.views.widgets.TabContainer;
 
 
 public class FeedListActivity extends ActionBarActivity {
-
     @InjectView(R.id.tabs)
     TabContainer tabContainer;
 
