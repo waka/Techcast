@@ -1,16 +1,26 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="waka.techcast.activities.FeedListActivity"
-    >
+    tools:context="waka.techcast.activities.FeedListActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:background="@color/theme_primary"
+        app:popupTheme="@style/Theme.AppCompat.Light"
+        />
 
     <waka.techcast.views.widgets.TabContainer
         android:id="@+id/tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:background="?android:attr/colorPrimary"
         >
         <TabWidget
@@ -26,7 +36,7 @@
         <View
             android:id="@+id/indicator"
             android:layout_width="match_parent"
-            android:layout_height="2dp"
+            android:layout_height="4dp"
             android:layout_gravity="bottom"
             android:background="?android:attr/colorControlActivated"
             />

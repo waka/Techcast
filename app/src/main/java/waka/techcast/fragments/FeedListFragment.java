@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +14,10 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import rx.functions.Action1;
-import waka.techcast.internal.di.Injector;
 import waka.techcast.R;
+import waka.techcast.activities.FeedListActivity;
 import waka.techcast.enums.ChannelEnum;
+import waka.techcast.internal.di.Injector;
 import waka.techcast.models.Feed;
 import waka.techcast.view_models.FeedListViewModel;
 import waka.techcast.views.adapters.FeedListAdapter;
@@ -48,10 +49,8 @@ public class FeedListFragment extends Fragment {
 
         Injector.get().inject(this);
 
-        if (getArguments() != null) {
-            ChannelEnum channel = (ChannelEnum) getArguments().getSerializable(CHANNEL_KEY);
-            viewModel.setChannel(channel);
-        }
+        ChannelEnum channel = (ChannelEnum) getArguments().getSerializable(CHANNEL_KEY);
+        viewModel.setChannel(channel);
     }
 
     @Override
@@ -70,22 +69,21 @@ public class FeedListFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        ((FeedListActivity) getActivity()).setToolbarTitle(viewModel.getChannel().getTitle());
         setupListView();
-        getFeedList();
     }
 
     private void setupListView() {
         feedListView.setHasFixedSize(false);
         feedListView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        FeedListAdapter feedListAdapter = new FeedListAdapter();
+        final FeedListAdapter feedListAdapter = new FeedListAdapter();
         feedListView.setAdapter(feedListAdapter);
-    }
 
-    private void getFeedList() {
         viewModel.getFeedList().subscribe(new Action1<Feed>() {
             @Override
             public void call(Feed feed) {
+                feedListAdapter.setItems(feed.getItems());
             }
         });
     }

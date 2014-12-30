@@ -3,6 +3,7 @@ package waka.techcast.activities;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -14,6 +15,9 @@ import waka.techcast.views.widgets.TabContainer;
 
 
 public class FeedListActivity extends ActionBarActivity {
+    @InjectView(R.id.toolbar)
+    Toolbar toolbar;
+
     @InjectView(R.id.tabs)
     TabContainer tabContainer;
 
@@ -27,9 +31,8 @@ public class FeedListActivity extends ActionBarActivity {
 
         ButterKnife.inject(this);
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setElevation(0);
-        }
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setElevation(0);
 
         setupViewPager();
     }
@@ -38,6 +41,10 @@ public class FeedListActivity extends ActionBarActivity {
     public void onDestroy() {
         ButterKnife.reset(this);
         super.onDestroy();
+    }
+
+    public void setToolbarTitle(String title) {
+        getSupportActionBar().setTitle(title);
     }
 
     private void setupViewPager() {

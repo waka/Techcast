@@ -52,3 +52,8 @@
 -keep interface com.squareup.okhttp.** { *; }
 -dontwarn java.nio.file.*
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+
+# Joda-Time
+-keep class org.joda.time.** { *; }
+-dontwarn org.joda.convert.FromString
+-dontwarn org.joda.convert.ToString

@@ -25,6 +25,10 @@ public class FeedListViewModel {
         this.channel = channel;
     }
 
+    public ChannelEnum getChannel() {
+        return channel;
+    }
+
     public Observable<Feed> getFeedList() {
         return client.call(RequestBuilderUtils.get(channel.getUrl()))
                 .map(new FeedListFunc());

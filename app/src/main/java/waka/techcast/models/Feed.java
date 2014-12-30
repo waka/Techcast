@@ -13,7 +13,7 @@ public class Feed {
     private String category;
     private String author;
     private String image;
-    private List<Item> items;
+    private final List<Item> items;
 
     public Feed() {
         items = new ArrayList<>();

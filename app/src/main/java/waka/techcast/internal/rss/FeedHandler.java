@@ -2,12 +2,8 @@ package waka.techcast.internal.rss;
 
 import android.net.Uri;
 
-import org.joda.time.DateTime;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import waka.techcast.models.Enclosure;
 import waka.techcast.models.Feed;
