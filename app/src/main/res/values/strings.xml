@@ -2,8 +2,24 @@
 <resources>
 
     <string name="app_name">Techcast</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="app_description">Japanese tech podcasts player.</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <!-- card -->
+    <string name="label_play">再生</string>
+    <string name="label_download">ダウンロード</string>
+    <string name="label_clear">キャッシュ削除</string>
+
+    <!-- images -->
+    <string name="image_logo_desc">Logo</string>
+    <string name="image_description">blurblur</string>
+
+    <!-- detail -->
+    <string name="label_description">概要</string>
+    <string name="label_relevant_links">関連リンク</string>
+
+    <!-- player -->
+    <string name="label_default_duration">00:00</string>
 </resources>

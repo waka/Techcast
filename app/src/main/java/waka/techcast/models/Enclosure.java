@@ -1,23 +1,23 @@
 package waka.techcast.models;
 
-import android.net.Uri;
+import java.io.Serializable;
 
-public class Enclosure {
-    private Uri url;
+public class Enclosure implements Serializable {
+    private String url;
     private String type;
     private int length;
 
-    public Enclosure(Uri url, String type, int length) {
+    public Enclosure(String url, String type, int length) {
         this.url = url;
         this.type = type;
         this.length = length;
     }
 
-    public Uri getUrl() {
+    public String getUrl() {
         return url;
     }
 
-    public void setUrl(Uri url) {
+    public void setUrl(String url) {
         this.url = url;
     }
 

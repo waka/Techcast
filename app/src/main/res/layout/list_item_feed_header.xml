@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/spacing_vertical_offset_large"
+    >
+    <ImageView
+        android:id="@+id/logo_image"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_vertical_cover"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/image_logo_desc"
+        />
+</LinearLayout>

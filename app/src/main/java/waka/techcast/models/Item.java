@@ -1,12 +1,14 @@
 package waka.techcast.models;
 
-import android.net.Uri;
+import java.io.Serializable;
 
-public class Item {
+public class Item implements Serializable {
+    public static final String KEY = "ITEM";
+
     private String title;
     private String description;
     private String pubDate;
-    private Uri link;
+    private String link;
     private String subTitle;
     private String duration;
     private Enclosure enclosure;
@@ -35,11 +37,11 @@ public class Item {
         this.pubDate = pubDate;
     }
 
-    public Uri getLink() {
+    public String getLink() {
         return link;
     }
 
-    public void setLink(Uri link) {
+    public void setLink(String link) {
         this.link = link;
     }
 
@@ -65,5 +67,9 @@ public class Item {
 
     public void setEnclosure(Enclosure enclosure) {
         this.enclosure = enclosure;
+    }
+
+    public boolean equals(Item item) {
+        return super.equals(item);
     }
 }

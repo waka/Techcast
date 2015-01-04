@@ -31,7 +31,16 @@ public class FeedHandler extends DefaultHandler {
             item = new Item();
             feed.addItem(item);
         }
-        if (item != null && qName.equals("enclosure")) {
+        if (item == null) {
+            switch (qName) {
+                case "itunes:image":
+                    FeedSetter.setImage(feed, attributes);
+                    break;
+                case "media:thumbnail":
+                    FeedSetter.setThumbnail(feed, attributes);
+                    break;
+            }
+        } else if (qName.equals("enclosure")) {
             ItemSetter.setEnclosure(item, attributes);
         }
     }
@@ -66,19 +75,23 @@ public class FeedHandler extends DefaultHandler {
                 case "link":
                     feed.setLink(Uri.parse(value));
                     break;
-                case "media:thumbnail":
-                    feed.setThumbnail(value);
-                    break;
                 case "media:category":
                     feed.setCategory(value);
                     break;
                 case "itunes:author":
                     feed.setAuthor(value);
                     break;
-                case "itunes:image":
-                    feed.setImage(value);
-                    break;
             }
+        }
+
+        public static void setThumbnail(Feed feed, Attributes attributes) {
+            String url = attributes.getValue("url");
+            feed.setThumbnail(url);
+        }
+
+        public static void setImage(Feed feed, Attributes attributes) {
+            String url = attributes.getValue("href");
+            feed.setImage(url);
         }
     }
 
@@ -95,7 +108,7 @@ public class FeedHandler extends DefaultHandler {
                     item.setPubDate(value);
                     break;
                 case "link":
-                    item.setLink(Uri.parse(value));
+                    item.setLink(value);
                     break;
                 case "itunes:subtitle":
                     item.setSubTitle(value);
@@ -110,7 +123,7 @@ public class FeedHandler extends DefaultHandler {
             String url = attributes.getValue("url");
             String type = attributes.getValue("type");
             int length = Integer.parseInt(attributes.getValue("length"));
-            Enclosure enclosure = new Enclosure(Uri.parse(url), type, length);
+            Enclosure enclosure = new Enclosure(url, type, length);
             item.setEnclosure(enclosure);
         }
     }

@@ -1,5 +1,7 @@
 package waka.techcast.view_models;
 
+import android.content.Context;
+
 import javax.inject.Inject;
 
 import rx.Observable;
@@ -16,6 +18,7 @@ public class FeedListViewModel {
     Client client;
 
     private ChannelEnum channel;
+    private Feed feed;
 
     public FeedListViewModel() {
         Injector.get().inject(this);
@@ -29,15 +32,26 @@ public class FeedListViewModel {
         return channel;
     }
 
-    public Observable<Feed> getFeedList() {
-        return client.call(RequestBuilderUtils.get(channel.getUrl()))
+    public void setFeed(Feed feed) {
+        this.feed = feed;
+    }
+
+    public Feed getFeed() {
+        return feed;
+    }
+
+    public Observable<Feed> getFeedList(Context context) {
+        return client
+                .cache(context)
+                .call(RequestBuilderUtils.get(channel.getUrl()))
                 .map(new FeedListFunc());
     }
 
     private class FeedListFunc implements Func1<String, Feed> {
         @Override
         public Feed call(String responseText) {
-            return FeedConverter.convert(responseText);
+            feed = FeedConverter.convert(responseText);
+            return feed;
         }
     }
 }

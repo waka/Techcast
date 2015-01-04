@@ -3,7 +3,9 @@ package waka.techcast.internal.di;
 import javax.inject.Singleton;
 
 import dagger.Component;
+import waka.techcast.fragments.FeedDetailFragment;
 import waka.techcast.fragments.FeedListFragment;
+import waka.techcast.network.NetworkStateReceiver;
 import waka.techcast.view_models.FeedListViewModel;
 
 @Singleton
@@ -11,4 +13,6 @@ import waka.techcast.view_models.FeedListViewModel;
 public interface TechcastComponent {
     void inject(FeedListFragment fragment);
     void inject(FeedListViewModel viewModel);
+    void inject(FeedDetailFragment fragment);
+    void inject(NetworkStateReceiver networkStateReceiver);
 }

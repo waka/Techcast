@@ -1,13 +1,20 @@
 package waka.techcast.fragments;
 
+import android.app.Fragment;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.ListView;
+
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -19,17 +26,22 @@ import waka.techcast.activities.FeedListActivity;
 import waka.techcast.enums.ChannelEnum;
 import waka.techcast.internal.di.Injector;
 import waka.techcast.models.Feed;
+import waka.techcast.models.Item;
 import waka.techcast.view_models.FeedListViewModel;
 import waka.techcast.views.adapters.FeedListAdapter;
 
 public class FeedListFragment extends Fragment {
     private static final String CHANNEL_KEY = "channel";
+    private static final int LOGO_IMAGE_DP = 128;
+
+    private FeedListAdapter feedListAdapter;
+    private FeedListAdapter.HeaderItemViewHolder headerItemViewHolder;
 
     @Inject
     FeedListViewModel viewModel;
 
     @InjectView(R.id.feed_list)
-    RecyclerView feedListView;
+    ListView feedListView;
 
     public static FeedListFragment newInstance(ChannelEnum channel) {
         FeedListFragment fragment = new FeedListFragment();
@@ -69,22 +81,78 @@ public class FeedListFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ((FeedListActivity) getActivity()).setToolbarTitle(viewModel.getChannel().getTitle());
         setupListView();
+        fetchFeed();
     }
 
     private void setupListView() {
-        feedListView.setHasFixedSize(false);
-        feedListView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        final FeedListAdapter feedListAdapter = new FeedListAdapter();
-        feedListView.setAdapter(feedListAdapter);
-
-        viewModel.getFeedList().subscribe(new Action1<Feed>() {
+        List<Item> items = new ArrayList<>();
+        feedListAdapter = new FeedListAdapter(getActivity(), items, new FeedListAdapter.OnClickListener() {
             @Override
-            public void call(Feed feed) {
-                feedListAdapter.setItems(feed.getItems());
+            public void onContentsClick(Item item) {
+                selectItem(item);
+            }
+
+            @Override
+            public void onPlayClick(Item item) {
+
+            }
+
+            @Override
+            public void onClearClick(Item item) {
+
             }
         });
+        feedListView.setAdapter(feedListAdapter);
+
+        View view = feedListAdapter.getInflater().inflate(R.layout.list_item_feed_header, null, false);
+        headerItemViewHolder = new FeedListAdapter.HeaderItemViewHolder(view);
+        feedListView.addHeaderView(headerItemViewHolder.getView());
+
+        feedListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {}
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i2, int i3) {
+                View header = headerItemViewHolder.getView();
+                int height = (header == null) ? 0 : header.getHeight();
+                int y = (header == null) ? 0 : header.getTop();
+                ((FeedListActivity) getActivity()).updateToolbar(height, Math.abs(y));
+            }
+        });
+    }
+
+    private void fetchFeed() {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        final int px = (int) (metrics.density * LOGO_IMAGE_DP);
+
+        viewModel.getFeedList(getActivity()).subscribe(new Action1<Feed>() {
+            @Override
+            public void call(final Feed feed) {
+                Picasso.with(getActivity())
+                        .load(Uri.parse(feed.getImage()))
+                        .resize(px, px)
+                        .into(headerItemViewHolder.getLogoImageView(), new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                displayItems(feed.getItems());
+                            }
+
+                            @Override
+                            public void onError() {
+                                displayItems(feed.getItems());
+                            }
+                        });
+            }
+        });
+    }
+
+    private void displayItems(List<Item> items) {
+        feedListAdapter.setItems(items);
+    }
+
+    private void selectItem(Item item) {
+        ((FeedListActivity) getActivity()).moveToDetail(item);
     }
 }

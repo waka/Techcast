@@ -1,8 +1,14 @@
 package waka.techcast.network;
 
+import android.content.Context;
+
+import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+
+import java.io.File;
+import java.io.IOException;
 
 import javax.inject.Singleton;
 
@@ -39,5 +45,17 @@ public class Client {
         return Observable.create(new RequestSubscriber(call))
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Client cache(Context context) {
+        File cacheDir = new File(context.getCacheDir(), "techcast_feed_cache");
+        Cache cache;
+        try {
+            cache = new Cache(cacheDir, (long) 10.0 * 1024 * 1024);
+        } catch (IOException e) {
+            cache = null;
+        }
+        okHttpClient.setCache(cache);
+        return this;
     }
 }

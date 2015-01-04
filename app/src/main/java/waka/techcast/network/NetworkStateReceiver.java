@@ -8,9 +8,16 @@ import android.net.NetworkInfo;
 
 import javax.inject.Inject;
 
+import waka.techcast.internal.di.Injector;
+
 public class NetworkStateReceiver extends BroadcastReceiver {
     @Inject
     Client client;
+
+    public NetworkStateReceiver() {
+        super();
+        Injector.get().inject(this);
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
