@@ -1,5 +1,6 @@
 package waka.techcast.models;
 
+import java.io.File;
 import java.io.Serializable;
 
 public class Item implements Serializable {
@@ -71,5 +72,19 @@ public class Item implements Serializable {
 
     public boolean equals(Item item) {
         return super.equals(item);
+    }
+
+    public boolean isDownloaded() {
+        File file = new File(getCachePath());
+        return file.exists();
+    }
+
+    public String getCachePath() {
+        return "";
+    }
+
+    public boolean clearCache() {
+        File file = new File(getCachePath());
+        return file.delete();
     }
 }

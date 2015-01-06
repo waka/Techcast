@@ -27,6 +27,7 @@ import waka.techcast.enums.ChannelEnum;
 import waka.techcast.internal.di.Injector;
 import waka.techcast.models.Feed;
 import waka.techcast.models.Item;
+import waka.techcast.services.DownloadService;
 import waka.techcast.view_models.FeedListViewModel;
 import waka.techcast.views.adapters.FeedListAdapter;
 
@@ -90,17 +91,22 @@ public class FeedListFragment extends Fragment {
         feedListAdapter = new FeedListAdapter(getActivity(), items, new FeedListAdapter.OnClickListener() {
             @Override
             public void onContentsClick(Item item) {
-                selectItem(item);
+                handleItemToClick(item);
             }
 
             @Override
             public void onPlayClick(Item item) {
+                handleItemToPlay(item);
+            }
 
+            @Override
+            public void onDownloadClick(Item item) {
+                handleItemToDownload(item);
             }
 
             @Override
             public void onClearClick(Item item) {
-
+                handleItemToClear(item);
             }
         });
         feedListView.setAdapter(feedListAdapter);
@@ -152,7 +158,27 @@ public class FeedListFragment extends Fragment {
         feedListAdapter.setItems(items);
     }
 
-    private void selectItem(Item item) {
+    private void handleItemToClick(final Item item) {
         ((FeedListActivity) getActivity()).moveToDetail(item);
+    }
+
+    private void handleItemToPlay(final Item item) {
+        if (item.isDownloaded()) {
+            // play from cache
+        } else {
+            // play from streaming
+        }
+    }
+
+    private void handleItemToDownload(final Item item) {
+        if (DownloadService.isDownloading(item)) {
+            DownloadService.cancel(item);
+        } else {
+            DownloadService.start(getActivity(), item);
+        }
+    }
+
+    private void handleItemToClear(final Item item) {
+        DownloadService.clear(item);
     }
 }

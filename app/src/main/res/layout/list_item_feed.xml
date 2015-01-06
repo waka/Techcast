@@ -15,8 +15,8 @@
         android:orientation="vertical"
         android:padding="@dimen/spacing_vertical_offset_large"
         android:background="@color/theme_card_background"
-        tools:ignore="UselessParent">
-
+        tools:ignore="UselessParent"
+        >
         <TextView
             android:id="@+id/item_title"
             android:layout_width="wrap_content"

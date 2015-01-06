@@ -9,26 +9,26 @@ import java.util.List;
 
 import waka.techcast.models.Item;
 
-public class Mp3DownloadService extends IntentService {
+public class DownloadService extends IntentService {
     private static final String EXTRA_KEY = "mp3_download";
     private static List<Item> downloadingList = new ArrayList<>();
 
     public static Intent createIntent(Context context, Item item) {
-        Intent intent = new Intent(context, Mp3DownloadService.class);
+        Intent intent = new Intent(context, DownloadService.class);
         intent.putExtra(EXTRA_KEY, item);
         return intent;
     }
 
-    public static void startDownload(Context context, Item item) {
+    public static void start(Context context, Item item) {
         Intent intent = createIntent(context, item);
         context.startService(intent);
     }
 
-    public Mp3DownloadService() {
-        super(Mp3DownloadService.class.getSimpleName());
+    public DownloadService() {
+        super(DownloadService.class.getSimpleName());
     }
 
-    public Mp3DownloadService(String name) {
+    public DownloadService(String name) {
         super(name);
     }
 
@@ -37,14 +37,18 @@ public class Mp3DownloadService extends IntentService {
         return (index != -1);
     }
 
-    public static void cancel(Context context, Item item) {
+    public static void cancel(Item item) {
         int index = getItemIndexFromDownloadingList(item);
         if (index == -1) {
             return;
         }
 
         removeItemFromDownloadingList(item);
-        //Mp3DownloadNotification.cancel(context, item);
+        //DownloadNotification.cancel(context, item);
+    }
+
+    public static void clear(Item item) {
+        item.clearCache();
     }
 
     public static int getItemIndexFromDownloadingList(Item item) {

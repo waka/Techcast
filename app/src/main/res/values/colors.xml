@@ -16,4 +16,9 @@
 
     <color name="theme_devider">#CCCCCC</color>
     <color name="theme_transparent">#FFFFFFFF</color>
+
+    <color name="theme_dialog_title">#474747</color>
+    <color name="theme_dialog_content">#999999</color>
+    <color name="theme_dialog_item">#999999</color>
+    <color name="theme_dialog_button">#212121</color>
 </resources>

@@ -20,6 +20,7 @@ import waka.techcast.models.Item;
 public class FeedListAdapter extends ArrayAdapter<Item> {
     public interface OnClickListener {
         public void onContentsClick(Item item);
+        public void onDownloadClick(Item item);
         public void onPlayClick(Item item);
         public void onClearClick(Item item);
     }
@@ -98,6 +99,8 @@ public class FeedListAdapter extends ArrayAdapter<Item> {
 
         @InjectView(R.id.play_button)
         LinearLayout playView;
+        @InjectView(R.id.clear_button)
+        LinearLayout clearView;
         @InjectView(R.id.download_button)
         LinearLayout downloadView;
 
@@ -125,10 +128,16 @@ public class FeedListAdapter extends ArrayAdapter<Item> {
                     listener.onPlayClick(item);
                 }
             });
-            downloadView.setOnClickListener(new View.OnClickListener() {
+            clearView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     listener.onClearClick(item);
+                }
+            });
+            downloadView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    listener.onDownloadClick(item);
                 }
             });
         }
