@@ -25,11 +25,13 @@ import waka.techcast.R;
 import waka.techcast.activities.FeedListActivity;
 import waka.techcast.enums.ChannelEnum;
 import waka.techcast.internal.di.Injector;
+import waka.techcast.internal.utils.DialogUtils;
 import waka.techcast.models.Feed;
 import waka.techcast.models.Item;
 import waka.techcast.services.DownloadService;
 import waka.techcast.view_models.FeedListViewModel;
 import waka.techcast.views.adapters.FeedListAdapter;
+import waka.techcast.views.widgets.MaterialDialog;
 
 public class FeedListFragment extends Fragment {
     private static final String CHANNEL_KEY = "channel";
@@ -171,14 +173,18 @@ public class FeedListFragment extends Fragment {
     }
 
     private void handleItemToDownload(final Item item) {
+        MaterialDialog dialog;
+
         if (DownloadService.isDownloading(item)) {
-            DownloadService.cancel(item);
+            dialog = DialogUtils.createDownloadCancelDialog(getActivity(), item);
         } else {
-            DownloadService.start(getActivity(), item);
+            dialog = DialogUtils.createDownloadDialog(getActivity(), item);
         }
+        dialog.show();
     }
 
     private void handleItemToClear(final Item item) {
-        DownloadService.clear(item);
+        MaterialDialog dialog = DialogUtils.createDownloadClearDialog(getActivity(), item);
+        dialog.show();
     }
 }

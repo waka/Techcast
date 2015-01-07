@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import waka.techcast.R;
@@ -24,15 +25,11 @@ public class MaterialDialog extends AlertDialog {
     private String negativeText;
     private Typeface typeface;
 
-    private View rootView;
-    private View customView;
-    private TextView titleView;
-    private TextView contentView;
-    private TextView confirmView;
-    private TextView cancelView;
+    private Button confirmView;
+    private Button cancelView;
 
     private MaterialDialog(Builder builder) {
-        super(new ContextThemeWrapper(builder.context, R.style.MaterialDialog));
+        super(new ContextThemeWrapper(builder.context, R.style.AppTheme_Dialog));
 
         this.context = builder.context;
         this.title   = builder.title;
@@ -41,43 +38,94 @@ public class MaterialDialog extends AlertDialog {
         this.negativeText = builder.negativeText;
         this.typeface = builder.typeface;
 
-        setup();
+        setupViews();
+        setListeners();
     }
 
-    private void setup() {
-        rootView = LayoutInflater.from(context).inflate(R.layout.dialog, null);
-        titleView   = rootView.findViewById(R.id.dialog_title);
-        contentView = rootView.findViewById(R.id.dialog_content);
-        confirmView = rootView.findViewById(R.id.dialog_confirm);
-        cancelView  = rootView.findViewById(R.id.dialog_cancel);
+    private void setupViews() {
+        View rootView = LayoutInflater.from(context).inflate(R.layout.dialog, null);
 
+        TextView titleView = (TextView) rootView.findViewById(R.id.dialog_title);
+        titleView.setTypeface(typeface);
+        titleView.setText(title);
 
+        TextView contentView = (TextView) rootView.findViewById(R.id.dialog_content);
+        contentView.setTypeface(typeface);
+        contentView.setText(content);
+
+        confirmView = (Button) rootView.findViewById(R.id.dialog_confirm);
+        confirmView.setTypeface(typeface);
+        confirmView.setText(positiveText);
+
+        cancelView  = (Button) rootView.findViewById(R.id.dialog_cancel);
+        cancelView.setTypeface(typeface);
+        cancelView.setText(negativeText);
+
+        super.setView(rootView);
+    }
+
+    private void setListeners() {
+        // Set the listener that handles positive button clicks.
+        confirmView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null) {
+                    listener.onConfirmClick();
+                }
+                dismiss();
+            }
+        });
+
+        // Set the listener that handles negative button clicks.
+        cancelView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null) {
+                    listener.onCancelClick();
+                }
+                dismiss();
+            }
+        });
+    }
+
+    public MaterialDialog setOnClickListener(OnClickListener listener) {
+        this.listener = listener;
+        return this;
     }
 
 
     public static class Builder {
         private final Context context;
         private final String title;
-        private final String positiveText;
-        private String negativeText = "";
+        private String positiveText = "OK";
+        private String negativeText = "Cancel";
         private String content = "";
         private Typeface typeface;
 
-        public Builder(Context context, String title, String positiveText) {
+        public Builder(Context context, String title) {
             this.context = context;
             this.title = title;
-            this.positiveText = positiveText;
 
             // Load typeface from assets to be used.
             typeface = Typeface.createFromAsset(this.context.getResources().getAssets(), "Roboto-Medium.ttf");
         }
 
-        public Builder(Context context, int titleResId, int positiveTextResId) {
-            this(context, context.getString(titleResId), context.getString(positiveTextResId));
+        public Builder(Context context, int titleResId) {
+            this(context, context.getString(titleResId));
         }
 
         public Builder content(String content) {
             this.content = content;
+            return this;
+        }
+
+        public Builder positiveText(String positiveText) {
+            this.positiveText = positiveText;
+            return this;
+        }
+
+        public Builder positiveText(int positiveTextResId) {
+            this.positiveText = context.getString(positiveTextResId);
             return this;
         }
 

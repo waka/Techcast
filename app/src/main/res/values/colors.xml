@@ -20,5 +20,7 @@
     <color name="theme_dialog_title">#474747</color>
     <color name="theme_dialog_content">#999999</color>
     <color name="theme_dialog_item">#999999</color>
-    <color name="theme_dialog_button">#212121</color>
+    <color name="theme_dialog_button">#03A9F4</color>
+    <color name="theme_dialog_dim_light">#80E0E0E0</color>
+    <color name="theme_dialog_transparent">#00000000</color>
 </resources>
