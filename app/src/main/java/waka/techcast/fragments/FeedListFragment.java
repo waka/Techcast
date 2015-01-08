@@ -29,6 +29,7 @@ import waka.techcast.internal.utils.DialogUtils;
 import waka.techcast.models.Feed;
 import waka.techcast.models.Item;
 import waka.techcast.services.DownloadService;
+import waka.techcast.stores.FileStore;
 import waka.techcast.view_models.FeedListViewModel;
 import waka.techcast.views.adapters.FeedListAdapter;
 import waka.techcast.views.widgets.MaterialDialog;
@@ -160,19 +161,19 @@ public class FeedListFragment extends Fragment {
         feedListAdapter.setItems(items);
     }
 
-    private void handleItemToClick(final Item item) {
+    private void handleItemToClick(Item item) {
         ((FeedListActivity) getActivity()).moveToDetail(item);
     }
 
-    private void handleItemToPlay(final Item item) {
-        if (item.isDownloaded()) {
+    private void handleItemToPlay(Item item) {
+        if (FileStore.exists(getActivity(), item)) {
             // play from cache
         } else {
             // play from streaming
         }
     }
 
-    private void handleItemToDownload(final Item item) {
+    private void handleItemToDownload(Item item) {
         MaterialDialog dialog;
 
         if (DownloadService.isDownloading(item)) {

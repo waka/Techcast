@@ -7,9 +7,17 @@ import android.content.Intent;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import rx.functions.Action1;
+import waka.techcast.internal.utils.RequestBuilderUtils;
 import waka.techcast.models.Item;
+import waka.techcast.network.Client;
 
 public class DownloadService extends IntentService {
+    @Inject
+    Client client;
+
     private static final String EXTRA_KEY = "mp3_download";
     private static List<Item> downloadingList = new ArrayList<>();
 
@@ -45,10 +53,6 @@ public class DownloadService extends IntentService {
 
         removeItemFromDownloadingList(item);
         //DownloadNotification.cancel(context, item);
-    }
-
-    public static void clear(Item item) {
-        item.clearCache();
     }
 
     public static int getItemIndexFromDownloadingList(Item item) {
@@ -87,5 +91,13 @@ public class DownloadService extends IntentService {
         if (item == null || isDownloading(item)) {
             return;
         }
+
+        client.cache(getApplicationContext())
+                .call(RequestBuilderUtils.get(item.getEnclosure().getUrl()))
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String s) {
+                    }
+                });
     }
 }

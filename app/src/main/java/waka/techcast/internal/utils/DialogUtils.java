@@ -4,6 +4,7 @@ import android.content.Context;
 
 import waka.techcast.models.Item;
 import waka.techcast.services.DownloadService;
+import waka.techcast.stores.FileStore;
 import waka.techcast.views.widgets.MaterialDialog;
 
 public class DialogUtils {
@@ -55,7 +56,7 @@ public class DialogUtils {
         dialog.setOnClickListener(new MaterialDialog.OnClickListener() {
             @Override
             public void onConfirmClick() {
-                DownloadService.clear(item);
+                FileStore.delete(context, item);
             }
 
             @Override
