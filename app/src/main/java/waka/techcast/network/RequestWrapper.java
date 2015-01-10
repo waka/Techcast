@@ -6,15 +6,10 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 
 public class RequestWrapper {
-    public interface Callbacks {
-        public void onSuccess(String responseText);
-        public void onFailure(Throwable error);
-    }
-
     private final Call call;
-    private final Callbacks callbacks;
+    private final RequestCallbacks callbacks;
 
-    public RequestWrapper(Call call, Callbacks callbacks) {
+    public RequestWrapper(Call call, RequestCallbacks callbacks) {
         this.call = call;
         this.callbacks = callbacks;
     }
@@ -26,7 +21,7 @@ public class RequestWrapper {
     public void execute() throws IOException {
         Response res = call.execute();
         if (res.isSuccessful()) {
-            callbacks.onSuccess(res.body().string());
+            callbacks.onSuccess(res);
         } else {
             callbacks.onFailure(new Exception("failed"));
         }

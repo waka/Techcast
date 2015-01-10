@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -28,8 +29,9 @@ import waka.techcast.internal.di.Injector;
 import waka.techcast.internal.utils.DialogUtils;
 import waka.techcast.models.Feed;
 import waka.techcast.models.Item;
+import waka.techcast.rx.DownloadSubject;
 import waka.techcast.services.DownloadService;
-import waka.techcast.stores.FileStore;
+import waka.techcast.stores.ItemStore;
 import waka.techcast.view_models.FeedListViewModel;
 import waka.techcast.views.adapters.FeedListAdapter;
 import waka.techcast.views.widgets.MaterialDialog;
@@ -87,6 +89,13 @@ public class FeedListFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         setupListView();
         fetchFeed();
+
+        DownloadSubject.receive().subscribe(new Action1<Item>() {
+            @Override
+            public void call(Item item) {
+                feedListAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     private void setupListView() {
@@ -136,25 +145,34 @@ public class FeedListFragment extends Fragment {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         final int px = (int) (metrics.density * LOGO_IMAGE_DP);
 
-        viewModel.getFeedList(getActivity()).subscribe(new Action1<Feed>() {
-            @Override
-            public void call(final Feed feed) {
-                Picasso.with(getActivity())
-                        .load(Uri.parse(feed.getImage()))
-                        .resize(px, px)
-                        .into(headerItemViewHolder.getLogoImageView(), new Callback() {
-                            @Override
-                            public void onSuccess() {
-                                displayItems(feed.getItems());
-                            }
+        // TODO RSSフィードロード中を表示
 
-                            @Override
-                            public void onError() {
-                                displayItems(feed.getItems());
-                            }
-                        });
-            }
-        });
+        viewModel.getFeedList(getActivity())
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Toast.makeText(getActivity(), R.string.error_fetch_feed, Toast.LENGTH_LONG).show();
+                    }
+                })
+                .subscribe(new Action1<Feed>() {
+                    @Override
+                    public void call(final Feed feed) {
+                        Picasso.with(getActivity())
+                                .load(Uri.parse(feed.getImage()))
+                                .resize(px, px)
+                                .into(headerItemViewHolder.getLogoImageView(), new Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        displayItems(feed.getItems());
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        displayItems(feed.getItems());
+                                    }
+                                });
+                    }
+                });
     }
 
     private void displayItems(List<Item> items) {
@@ -166,7 +184,7 @@ public class FeedListFragment extends Fragment {
     }
 
     private void handleItemToPlay(Item item) {
-        if (FileStore.exists(getActivity(), item)) {
+        if (ItemStore.exists(getActivity(), item)) {
             // play from cache
         } else {
             // play from streaming
@@ -177,15 +195,20 @@ public class FeedListFragment extends Fragment {
         MaterialDialog dialog;
 
         if (DownloadService.isDownloading(item)) {
-            dialog = DialogUtils.createDownloadCancelDialog(getActivity(), item);
+            dialog = DialogUtils.createDownloadCancelDialog(getActivity(), item, null);
         } else {
-            dialog = DialogUtils.createDownloadDialog(getActivity(), item);
+            dialog = DialogUtils.createDownloadDialog(getActivity(), item, null);
         }
         dialog.show();
     }
 
     private void handleItemToClear(final Item item) {
-        MaterialDialog dialog = DialogUtils.createDownloadClearDialog(getActivity(), item);
+        MaterialDialog dialog = DialogUtils.createDownloadClearDialog(getActivity(), item, new DialogUtils.DialogCallbacks() {
+            @Override
+            public void onConfirm() {
+                feedListAdapter.notifyDataSetChanged();
+            }
+        });
         dialog.show();
     }
 }

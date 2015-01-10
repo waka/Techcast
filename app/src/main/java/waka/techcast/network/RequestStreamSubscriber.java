@@ -3,28 +3,24 @@ package waka.techcast.network;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Response;
 
-import java.io.IOException;
+import java.io.InputStream;
 
 import rx.Observable;
 import rx.Subscriber;
 
-public class RequestSubscriber implements Observable.OnSubscribe<String> {
+public class RequestStreamSubscriber implements Observable.OnSubscribe<InputStream> {
     private final Call call;
 
-    public RequestSubscriber(Call call) {
+    public RequestStreamSubscriber(Call call) {
         this.call = call;
     }
 
     @Override
-    public void call(final Subscriber<? super String> subscriber) {
+    public void call(final Subscriber<? super InputStream> subscriber) {
         RequestWrapper request = new RequestWrapper(call, new RequestCallbacks() {
             @Override
             public void onSuccess(Response response) {
-                try {
-                    subscriber.onNext(response.body().string());
-                } catch (IOException e) {
-                    subscriber.onNext(null);
-                }
+                subscriber.onNext(response.body().byteStream());
                 subscriber.onCompleted();
             }
 

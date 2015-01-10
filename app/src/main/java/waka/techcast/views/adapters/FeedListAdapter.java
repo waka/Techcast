@@ -16,13 +16,14 @@ import butterknife.InjectView;
 import waka.techcast.R;
 import waka.techcast.internal.utils.StringUtils;
 import waka.techcast.models.Item;
+import waka.techcast.stores.ItemStore;
 
 public class FeedListAdapter extends ArrayAdapter<Item> {
     public interface OnClickListener {
         public void onContentsClick(Item item);
         public void onDownloadClick(Item item);
-        public void onPlayClick(Item item);
         public void onClearClick(Item item);
+        public void onPlayClick(Item item);
     }
 
     private final LayoutInflater inflater;
@@ -66,6 +67,12 @@ public class FeedListAdapter extends ArrayAdapter<Item> {
     public void bindView(Item item, View view) {
         ItemViewHolder holder = (ItemViewHolder) view.getTag();
         holder.bind(item);
+
+        if (ItemStore.exists(getContext(), item)) {
+            holder.showClear();
+        } else {
+            holder.showDownload();
+        }
     }
 
     public static class HeaderItemViewHolder {
@@ -121,17 +128,10 @@ public class FeedListAdapter extends ArrayAdapter<Item> {
                     listener.onContentsClick(item);
                 }
             });
-
             playView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     listener.onPlayClick(item);
-                }
-            });
-            clearView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    listener.onClearClick(item);
                 }
             });
             downloadView.setOnClickListener(new View.OnClickListener() {
@@ -140,6 +140,22 @@ public class FeedListAdapter extends ArrayAdapter<Item> {
                     listener.onDownloadClick(item);
                 }
             });
+            clearView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    listener.onClearClick(item);
+                }
+            });
+        }
+
+        public void showDownload() {
+            clearView.setVisibility(View.GONE);
+            downloadView.setVisibility(View.VISIBLE);
+        }
+
+        public void showClear() {
+            downloadView.setVisibility(View.GONE);
+            clearView.setVisibility(View.VISIBLE);
         }
     }
 }

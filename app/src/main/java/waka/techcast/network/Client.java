@@ -9,6 +9,7 @@ import com.squareup.okhttp.Request;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.inject.Singleton;
 
@@ -47,8 +48,15 @@ public class Client {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Observable<InputStream> callDownload(Request request) {
+        Call call = okHttpClient.newCall(request);
+        return Observable.create(new RequestStreamSubscriber(call))
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(Schedulers.newThread());
+    }
+
     public Client cache(Context context) {
-        File cacheDir = new File(context.getCacheDir(), "techcast_feed_cache");
+        File cacheDir = new File(context.getCacheDir(), "techcast_http_cache");
         Cache cache;
         try {
             cache = new Cache(cacheDir, (long) 10.0 * 1024 * 1024);

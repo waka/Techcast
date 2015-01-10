@@ -12,6 +12,7 @@ public class Item implements Serializable {
     private String subTitle;
     private String duration;
     private Enclosure enclosure;
+    private String feedTitle;
 
     public String getTitle() {
         return title;
@@ -69,6 +70,14 @@ public class Item implements Serializable {
         this.enclosure = enclosure;
     }
 
+    public String getFeedTitle() {
+        return feedTitle;
+    }
+
+    public void setFeedTitle(String feedTitle) {
+        this.feedTitle = feedTitle;
+    }
+
     public boolean equals(Item item) {
         return super.equals(item);
     }
@@ -80,6 +89,6 @@ public class Item implements Serializable {
         if (point == -1) {
             return null;
         }
-        return enclosure.getUrl().substring(point + 1);
+        return feedTitle.replaceAll(" ", "_") + enclosure.getUrl().substring(point + 1);
     }
 }

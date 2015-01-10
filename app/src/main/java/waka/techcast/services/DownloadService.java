@@ -3,22 +3,27 @@ package waka.techcast.services;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import rx.functions.Action1;
+import waka.techcast.internal.di.Injector;
 import waka.techcast.internal.utils.RequestBuilderUtils;
 import waka.techcast.models.Item;
 import waka.techcast.network.Client;
+import waka.techcast.rx.DownloadSubject;
+import waka.techcast.stores.ItemStore;
 
 public class DownloadService extends IntentService {
     @Inject
     Client client;
 
-    private static final String EXTRA_KEY = "mp3_download";
+    private static final String EXTRA_KEY = "download_item";
     private static List<Item> downloadingList = new ArrayList<>();
 
     public static Intent createIntent(Context context, Item item) {
@@ -32,12 +37,14 @@ public class DownloadService extends IntentService {
         context.startService(intent);
     }
 
+    @SuppressWarnings("unused")
     public DownloadService() {
-        super(DownloadService.class.getSimpleName());
+        this(DownloadService.class.getSimpleName());
     }
 
     public DownloadService(String name) {
         super(name);
+        Injector.get().inject(this);
     }
 
     public static boolean isDownloading(Item item) {
@@ -87,16 +94,24 @@ public class DownloadService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Item item = (Item) intent.getSerializableExtra(EXTRA_KEY);
+        final Item item = (Item) intent.getSerializableExtra(EXTRA_KEY);
         if (item == null || isDownloading(item)) {
             return;
         }
 
-        client.cache(getApplicationContext())
-                .call(RequestBuilderUtils.get(item.getEnclosure().getUrl()))
-                .subscribe(new Action1<String>() {
+        client.callDownload(RequestBuilderUtils.get(item.getEnclosure().getUrl()))
+                .doOnError(new Action1<Throwable>() {
                     @Override
-                    public void call(String s) {
+                    public void call(Throwable throwable) {
+                        // show failed notification
+                        Log.v("service", "download error");
+                    }
+                })
+                .subscribe(new Action1<InputStream>() {
+                    @Override
+                    public void call(InputStream inputStream) {
+                        ItemStore.save(getApplicationContext(), inputStream, item);
+                        DownloadSubject.post(item);
                     }
                 });
     }

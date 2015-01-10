@@ -11,8 +11,8 @@ import java.io.InputStream;
 
 import waka.techcast.models.Item;
 
-public class FileStore {
-    private static final int BUFFER_SIZE = 20 * 1024;
+public class ItemStore {
+    private static final int BUFFER_SIZE = 10 * 1024;
 
     public static boolean save(Context context, InputStream inputStream, Item item) {
         BufferedInputStream bufferedInputStream = null;
@@ -29,7 +29,7 @@ public class FileStore {
             }
 
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             return false;
         } finally {
             try {

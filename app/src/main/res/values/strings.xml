@@ -3,9 +3,9 @@
 
     <string name="app_name">Techcast</string>
     <string name="app_description">Japanese tech podcasts player.</string>
-    <string name="action_settings">Settings</string>
-    <string name="title_activity_settings">Settings</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="action_reload">更新</string>
+    <string name="action_settings">設定</string>
+    <string name="title_activity_settings">設定</string>
 
     <!-- card -->
     <string name="label_play">再生</string>
@@ -22,4 +22,7 @@
 
     <!-- player -->
     <string name="label_default_duration">00:00</string>
+
+    <!-- error messages -->
+    <string name="error_fetch_feed">フィードの読み込みに失敗しました</string>
 </resources>

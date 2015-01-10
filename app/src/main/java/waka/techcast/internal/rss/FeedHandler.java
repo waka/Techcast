@@ -29,6 +29,7 @@ public class FeedHandler extends DefaultHandler {
 
         if (qName.equals("item")) {
             item = new Item();
+            item.setFeedTitle(feed.getTitle());
             feed.addItem(item);
         }
         if (item == null) {
