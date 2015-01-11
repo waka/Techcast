@@ -5,6 +5,6 @@
         android:state_pressed="true"
         />
     <item
-        android:drawable="@color/theme_transparent_inverse"
+        android:drawable="@color/theme_card_background"
         />
 </selector>

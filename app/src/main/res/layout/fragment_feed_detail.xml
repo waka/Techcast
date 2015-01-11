@@ -30,7 +30,7 @@
                 android:gravity="center"
                 android:padding="@dimen/spacing_vertical_offset_xlarge"
                 android:textColor="@color/theme_text_white"
-                android:textSize="@dimen/text_size_medium"
+                android:textSize="@dimen/text_title"
                 />
             <LinearLayout
                 android:orientation="horizontal"
@@ -109,7 +109,7 @@
                 android:layout_marginLeft="@dimen/keyline_horizontal_offset_left_exclude_edge"
                 android:layout_centerVertical="true"
                 android:textColor="@color/theme_primary"
-                android:textSize="@dimen/text_size_large"
+                android:textSize="@dimen/text_headline"
                 android:text="@string/label_description"
                 tools:ignore="RtlHardcoded"
                 />
@@ -128,7 +128,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/keyline_horizontal_offset_left_exclude_edge"
                 android:textColor="@color/theme_text_primary"
-                android:textSize="@dimen/text_size_xsmall"
+                android:textSize="@dimen/text_body"
                 tools:ignore="RtlHardcoded"
                 />
         </RelativeLayout>
@@ -169,7 +169,7 @@
                 android:layout_marginLeft="@dimen/keyline_horizontal_offset_left_exclude_edge"
                 android:layout_centerVertical="true"
                 android:textColor="@color/theme_primary"
-                android:textSize="@dimen/text_size_large"
+                android:textSize="@dimen/text_headline"
                 android:text="@string/label_relevant_links"
                 tools:ignore="RtlHardcoded"
                 />

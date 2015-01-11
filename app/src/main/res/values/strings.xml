@@ -1,28 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Techcast</string>
-    <string name="app_description">Japanese tech podcasts player.</string>
-    <string name="action_reload">更新</string>
+    <!-- global -->
+    <string name="app_name">Japanese Techcast</string>
+    <string name="app_description">日本の技術系Podcastを聴くためのアプリです.</string>
+
+    <!-- menu actions -->
+    <string name="action_reload">フィードを更新</string>
     <string name="action_settings">設定</string>
+
+    <!-- detail fragment -->
+    <string name="label_description">概要</string>
+    <string name="label_relevant_links">関連リンク</string>
+
+    <!-- settings fragment -->
     <string name="title_activity_settings">設定</string>
 
     <!-- card -->
     <string name="label_play">再生</string>
     <string name="label_download">ダウンロード</string>
-    <string name="label_clear">キャッシュ削除</string>
+    <string name="label_clear">ダウンロード済み</string>
 
     <!-- images -->
-    <string name="image_logo_desc">Logo</string>
     <string name="image_description">blurblur</string>
-
-    <!-- detail -->
-    <string name="label_description">概要</string>
-    <string name="label_relevant_links">関連リンク</string>
 
     <!-- player -->
     <string name="label_default_duration">00:00</string>
 
     <!-- error messages -->
     <string name="error_fetch_feed">フィードの読み込みに失敗しました</string>
+
+    <!-- dialogs -->
+    <string name="label_dialog_download">ダウンロード</string>
+    <string name="label_dialog_download_cancel">ダウンロード中止</string>
+    <string name="label_dialog_download_clear">キャッシュ削除</string>
+    <string name="label_dialog_streaming">ストリーミング再生</string>
+    <string name="label_dialog_streaming_description">ダウンロードしてから再生すると、オフライン時でも再生できます。</string>
+    <string name="label_dialog_negative">キャンセル</string>
+
+    <!-- notifications -->
+    <string name="label_notification_downloading">ダウンロード中..</string>
+    <string name="label_notification_downloaded">ダウンロード完了</string>
+    <string name="label_notification_download_cancel">キャンセルしました</string>
 </resources>

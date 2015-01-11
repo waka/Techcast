@@ -15,7 +15,7 @@
         android:layout_marginRight="@dimen/keyline_horizontal_edge"
         android:gravity="center_vertical"
         android:textColor="@color/theme_text_primary"
-        android:textSize="@dimen/text_size_small"
+        android:textSize="@dimen/text_subhead"
         android:background="@drawable/underline"
         tools:ignore="RtlHardcoded"
         />

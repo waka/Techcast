@@ -28,11 +28,15 @@ public class FeedListAdapter extends ArrayAdapter<Item> {
 
     private final LayoutInflater inflater;
     private final OnClickListener listener;
+    private HeaderViewHolder headerViewHolder;
 
     public FeedListAdapter(Context context, List<Item> items, OnClickListener listener) {
         super(context, 0, items);
         this.inflater = LayoutInflater.from(context);
         this.listener = listener;
+
+        View view = inflater.inflate(R.layout.list_item_feed_header, null, false);
+        headerViewHolder = new HeaderViewHolder(view);
     }
 
     public void setItems(List<Item> items) {
@@ -40,8 +44,8 @@ public class FeedListAdapter extends ArrayAdapter<Item> {
         notifyDataSetChanged();
     }
 
-    public LayoutInflater getInflater() {
-        return inflater;
+    public HeaderViewHolder getHeaderViewHolder() {
+        return headerViewHolder;
     }
 
     @Override
@@ -56,7 +60,7 @@ public class FeedListAdapter extends ArrayAdapter<Item> {
         return view;
     }
 
-    public View newView(LayoutInflater inflater, ViewGroup container) {
+    private View newView(LayoutInflater inflater, ViewGroup container) {
         View view = inflater.inflate(R.layout.list_item_feed, container, false);
 
         ItemViewHolder holder = new ItemViewHolder(view, listener);
@@ -64,7 +68,7 @@ public class FeedListAdapter extends ArrayAdapter<Item> {
         return view;
     }
 
-    public void bindView(Item item, View view) {
+    private void bindView(Item item, View view) {
         ItemViewHolder holder = (ItemViewHolder) view.getTag();
         holder.bind(item);
 
@@ -75,13 +79,13 @@ public class FeedListAdapter extends ArrayAdapter<Item> {
         }
     }
 
-    public static class HeaderItemViewHolder {
+    public static class HeaderViewHolder {
         private View view;
 
         @InjectView(R.id.logo_image)
         ImageView logoImageView;
 
-        public HeaderItemViewHolder(View view) {
+        public HeaderViewHolder(View view) {
             ButterKnife.inject(this, view);
             this.view = view;
         }

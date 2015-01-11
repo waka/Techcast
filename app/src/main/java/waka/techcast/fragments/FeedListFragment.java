@@ -1,6 +1,7 @@
 package waka.techcast.fragments;
 
 import android.app.Fragment;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -21,12 +22,14 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import waka.techcast.R;
 import waka.techcast.activities.FeedListActivity;
 import waka.techcast.enums.ChannelEnum;
 import waka.techcast.internal.di.Injector;
 import waka.techcast.internal.utils.DialogUtils;
+import waka.techcast.internal.utils.SharedPreferenceUtils;
 import waka.techcast.models.Feed;
 import waka.techcast.models.Item;
 import waka.techcast.rx.DownloadSubject;
@@ -35,16 +38,19 @@ import waka.techcast.stores.ItemStore;
 import waka.techcast.view_models.FeedListViewModel;
 import waka.techcast.views.adapters.FeedListAdapter;
 import waka.techcast.views.widgets.MaterialDialog;
+import waka.techcast.views.widgets.ProgressDialog;
 
 public class FeedListFragment extends Fragment {
     private static final String CHANNEL_KEY = "channel";
     private static final int LOGO_IMAGE_DP = 128;
 
     private FeedListAdapter feedListAdapter;
-    private FeedListAdapter.HeaderItemViewHolder headerItemViewHolder;
 
     @Inject
     FeedListViewModel viewModel;
+
+    @Inject
+    SharedPreferences sharedPreferences;
 
     @InjectView(R.id.feed_list)
     ListView feedListView;
@@ -122,10 +128,7 @@ public class FeedListFragment extends Fragment {
             }
         });
         feedListView.setAdapter(feedListAdapter);
-
-        View view = feedListAdapter.getInflater().inflate(R.layout.list_item_feed_header, null, false);
-        headerItemViewHolder = new FeedListAdapter.HeaderItemViewHolder(view);
-        feedListView.addHeaderView(headerItemViewHolder.getView());
+        feedListView.addHeaderView(feedListAdapter.getHeaderViewHolder().getView());
 
         feedListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -133,7 +136,7 @@ public class FeedListFragment extends Fragment {
 
             @Override
             public void onScroll(AbsListView absListView, int i, int i2, int i3) {
-                View header = headerItemViewHolder.getView();
+                View header = feedListAdapter.getHeaderViewHolder().getView();
                 int height = (header == null) ? 0 : header.getHeight();
                 int y = (header == null) ? 0 : header.getTop();
                 ((FeedListActivity) getActivity()).updateToolbar(height, Math.abs(y));
@@ -145,9 +148,15 @@ public class FeedListFragment extends Fragment {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         final int px = (int) (metrics.density * LOGO_IMAGE_DP);
 
-        // TODO RSSフィードロード中を表示
+        final ProgressDialog dialog = ProgressDialog.show(getActivity());
 
         viewModel.getFeedList(getActivity())
+                .doOnTerminate(new Action0() {
+                    @Override
+                    public void call() {
+                        dialog.cancel();
+                    }
+                })
                 .doOnError(new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
@@ -160,7 +169,7 @@ public class FeedListFragment extends Fragment {
                         Picasso.with(getActivity())
                                 .load(Uri.parse(feed.getImage()))
                                 .resize(px, px)
-                                .into(headerItemViewHolder.getLogoImageView(), new Callback() {
+                                .into(feedListAdapter.getHeaderViewHolder().getLogoImageView(), new Callback() {
                                     @Override
                                     public void onSuccess() {
                                         displayItems(feed.getItems());
@@ -187,7 +196,16 @@ public class FeedListFragment extends Fragment {
         if (ItemStore.exists(getActivity(), item)) {
             // play from cache
         } else {
-            // play from streaming
+            if (SharedPreferenceUtils.shouldShowDialog(sharedPreferences)) {
+                MaterialDialog dialog = DialogUtils.createFirstStreamingDialog(getActivity(), item, new DialogUtils.DialogCallbacks() {
+                    @Override
+                    public void onConfirm() {
+
+                    }
+                });
+            } else {
+                // immediate play
+            }
         }
     }
 

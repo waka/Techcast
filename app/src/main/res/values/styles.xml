@@ -13,4 +13,9 @@
 
     <style name="AppTheme.Dialog" parent="Theme.AppCompat.Light.Dialog">
     </style>
+
+    <style name="AppTheme.ProgressDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 </resources>
