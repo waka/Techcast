@@ -12,11 +12,11 @@ import waka.techcast.models.Item;
  * 複数ある場合はまとめるべき通知
  */
 public class DownloadedNotification {
-    private static int DOWNLOADED_NOTIFICATION_ID = 1000;
-
     public static void notify(Context context, Item item) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(DOWNLOADED_NOTIFICATION_ID, build(context, item));
+        notificationManager.notify(
+                NotificationIdFactory.get(item, NotificationIdFactory.Type.DOWNLOADED),
+                build(context, item));
     }
 
     public static Notification build(Context context, Item item) {
@@ -29,5 +29,10 @@ public class DownloadedNotification {
         notification.flags = Notification.FLAG_AUTO_CANCEL;
 
         return notification;
+    }
+
+    public static void cancel(Context context, Item item) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(NotificationIdFactory.get(item, NotificationIdFactory.Type.DOWNLOADED));
     }
 }

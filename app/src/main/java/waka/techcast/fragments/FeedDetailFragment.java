@@ -2,10 +2,14 @@ package waka.techcast.fragments;
 
 import android.os.Bundle;
 import android.app.Fragment;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import javax.inject.Inject;
@@ -17,7 +21,10 @@ import waka.techcast.R;
 import waka.techcast.activities.FeedDetailActivity;
 import waka.techcast.internal.di.Injector;
 import waka.techcast.internal.utils.StringUtils;
+import waka.techcast.media.PodcastPlayer;
 import waka.techcast.models.Item;
+import waka.techcast.rx.PodcastPlayerSubject;
+import waka.techcast.rx.ViewObservable;
 import waka.techcast.view_models.FeedDetailViewModel;
 import waka.techcast.views.widgets.ObservableScrollView;
 import waka.techcast.views.widgets.RelevantLinksView;
@@ -25,6 +32,9 @@ import waka.techcast.views.widgets.RelevantLinksView;
 public class FeedDetailFragment extends Fragment {
     @Inject
     FeedDetailViewModel viewModel;
+
+    @Inject
+    PodcastPlayer podcastPlayer;
 
     @InjectView(R.id.scrollview)
     ObservableScrollView scrollView;
@@ -35,8 +45,23 @@ public class FeedDetailFragment extends Fragment {
     @InjectView(R.id.item_title)
     TextView titleTextView;
 
+    @InjectView(R.id.player_seekbar)
+    SeekBar playerSeekBar;
+
+    @InjectView(R.id.player_elapsed_time)
+    TextView playerElapsedTimeTextView;
+
     @InjectView(R.id.player_duration)
     TextView playerDurationTextView;
+
+    @InjectView(R.id.player_action)
+    FrameLayout playerActionView;
+
+    @InjectView(R.id.play_button)
+    ImageView playButton;
+
+    @InjectView(R.id.pause_button)
+    ImageView pauseButton;
 
     @InjectView(R.id.item_description)
     TextView descriptionTextView;
@@ -82,15 +107,20 @@ public class FeedDetailFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        setup();
+        setupViews();
+        setupEvents();
     }
 
-    private void setup() {
+    @Override
+    public void onResume() {
+        super.onResume();
+        setupPlayer();
+    }
+
+    private void setupViews() {
         Item item = viewModel.getItem();
 
         titleTextView.setText(item.getTitle());
-        playerDurationTextView.setText(item.getDuration());
-
         descriptionTextView.setText(
                 StringUtils.omitArticle(StringUtils.fromHtml(item.getSubTitle())));
         relevantLinksView.addLinkView(item);
@@ -102,5 +132,78 @@ public class FeedDetailFragment extends Fragment {
                 ((FeedDetailActivity) getActivity()).updateToolbar(height, scroller.y);
             }
         });
+    }
+
+    private void setupEvents() {
+        final Item currentItem = viewModel.getItem();
+
+        ViewObservable.click(playerActionView).subscribe(new Action1<Void>() {
+            @Override
+            public void call(Void empty) {
+                if (podcastPlayer.isPlayingItem(currentItem)) {
+                    if (podcastPlayer.isPlaying()) {
+                        podcastPlayer.pause();
+                    } else {
+                        podcastPlayer.start();
+                    }
+                } else {
+                    podcastPlayer.play(getActivity(), currentItem);
+                }
+            }
+        });
+
+        PodcastPlayerSubject.receivePlayed().subscribe(new Action1<Item>() {
+            @Override
+            public void call(Item item) {
+                if (isAdded() && item.equals(currentItem)) {
+                    showPause();
+                }
+            }
+        });
+        PodcastPlayerSubject.receivePaused().subscribe(new Action1<Item>() {
+            @Override
+            public void call(Item item) {
+                if (isAdded() && item.equals(currentItem)) {
+                    showPlay();
+                }
+            }
+        });
+        PodcastPlayerSubject.receiveStopped().subscribe(new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                if (isAdded()) {
+                    showPlay();
+                }
+            }
+        });
+    }
+
+    private void setupPlayer() {
+        final Item currentItem = viewModel.getItem();
+
+        if (podcastPlayer.isPlaying() && podcastPlayer.isPlayingItem(currentItem)) {
+            // TODO sync seekbar and duration
+            showPause();
+        } else {
+            showPlay();
+        }
+
+        updateElapsedTime(0);
+        playerDurationTextView.setText(currentItem.getDuration());
+    }
+
+    private void showPlay() {
+        pauseButton.setVisibility(View.GONE);
+        playButton.setVisibility(View.VISIBLE);
+    }
+
+    private void showPause() {
+        playButton.setVisibility(View.GONE);
+        pauseButton.setVisibility(View.VISIBLE);
+    }
+
+    private void updateElapsedTime(int position) {
+        playerElapsedTimeTextView.setText(StringUtils.seekPositionToString(position));
+        playerSeekBar.setProgress(position);
     }
 }

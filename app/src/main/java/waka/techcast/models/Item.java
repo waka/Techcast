@@ -2,9 +2,12 @@ package waka.techcast.models;
 
 import java.io.Serializable;
 
+import waka.techcast.internal.utils.StringUtils;
+
 public class Item implements Serializable {
     public static final String KEY = "ITEM";
 
+    private int id;
     private String title;
     private String description;
     private String pubDate;
@@ -13,6 +16,14 @@ public class Item implements Serializable {
     private String duration;
     private Enclosure enclosure;
     private String feedTitle;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(String str) {
+        id = Math.abs(str.hashCode());
+    }
 
     public String getTitle() {
         return title;
@@ -79,7 +90,7 @@ public class Item implements Serializable {
     }
 
     public boolean equals(Item item) {
-        return super.equals(item);
+        return link.equals(item.getLink());
     }
 
     public String getFileName() {
@@ -89,6 +100,7 @@ public class Item implements Serializable {
         if (point == -1) {
             return null;
         }
-        return feedTitle.replaceAll(" ", "_") + enclosure.getUrl().substring(point + 1);
+        // feed title + enclosure file name
+        return StringUtils.replaceSigns(feedTitle) + enclosure.getUrl().substring(point + 1);
     }
 }

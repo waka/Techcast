@@ -6,7 +6,7 @@ public class SharedPreferenceUtils {
     private static String FIRST_STREAMING_KEY = "first_streaming";
 
     public static boolean shouldShowDialog(SharedPreferences sharedPreferences) {
-        return sharedPreferences.getBoolean(FIRST_STREAMING_KEY, false);
+        return !sharedPreferences.getBoolean(FIRST_STREAMING_KEY, false);
     }
 
     public static void doneShowDialog(SharedPreferences sharedPreferences) {

@@ -110,6 +110,8 @@ public class FeedHandler extends DefaultHandler {
                     break;
                 case "link":
                     item.setLink(value);
+                    // URLは一意になるはずなのでハッシュ値をidに使う
+                    item.setId(value);
                     break;
                 case "itunes:subtitle":
                     item.setSubTitle(value);

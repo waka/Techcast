@@ -14,18 +14,28 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import javax.inject.Inject;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
+import rx.functions.Action1;
 import waka.techcast.R;
 import waka.techcast.enums.ChannelEnum;
 import waka.techcast.fragments.FeedListFragment;
+import waka.techcast.internal.di.Injector;
+import waka.techcast.media.PodcastPlayer;
 import waka.techcast.models.Item;
+import waka.techcast.rx.PodcastPlayerSubject;
 import waka.techcast.views.adapters.DrawerListAdapter;
 import waka.techcast.views.widgets.DrawerToggle;
+import waka.techcast.views.widgets.MiniPodcastPlayerView;
 
 public class FeedListActivity extends ActionBarActivity {
     private DrawerToggle drawerToggle;
+
+    @Inject
+    PodcastPlayer podcastPlayer;
 
     @InjectView(R.id.drawer_layout)
     DrawerLayout drawerLayout;
@@ -42,20 +52,36 @@ public class FeedListActivity extends ActionBarActivity {
     @InjectView(R.id.toolbar_title)
     TextView toolbarTitleView;
 
+    @InjectView(R.id.mini_player)
+    MiniPodcastPlayerView miniPodcastPlayerView;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed_list);
 
+        Injector.get().inject(this);
         ButterKnife.inject(this);
 
         setupToolbar();
+        setupMiniPodcastPlayer();
         setupDrawerLayout();
 
         if (savedInstanceState == null) {
            getFragmentManager().beginTransaction()
                     .add(R.id.container, FeedListFragment.newInstance(ChannelEnum.REBUILD))
                     .commit();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (podcastPlayer.isPlaying() || podcastPlayer.isPaused()) {
+            miniPodcastPlayerView.show();
+        } else {
+            miniPodcastPlayerView.hide();
         }
     }
 
@@ -72,6 +98,36 @@ public class FeedListActivity extends ActionBarActivity {
 
         toolbarTitleView.setText(ChannelEnum.REBUILD.getTitle());
         toolbarTitleView.setAlpha(0);
+    }
+
+    private void setupMiniPodcastPlayer() {
+        miniPodcastPlayerView.setCallback(new MiniPodcastPlayerView.Callback() {
+            @Override
+            public void onClick(Item item) {
+                moveToDetail(item);
+            }
+        });
+
+        // publish from notification
+        PodcastPlayerSubject.receivePlayed().subscribe(new Action1<Item>() {
+            @Override
+            public void call(Item item) {
+                miniPodcastPlayerView.setPlayAndPauseCheckbox(true);
+                miniPodcastPlayerView.show();
+            }
+        });
+        PodcastPlayerSubject.receivePaused().subscribe(new Action1<Item>() {
+            @Override
+            public void call(Item item) {
+                miniPodcastPlayerView.setPlayAndPauseCheckbox(false);
+            }
+        });
+        PodcastPlayerSubject.receiveStopped().subscribe(new Action1<Void>() {
+            @Override
+            public void call(Void empty) {
+                miniPodcastPlayerView.hide();
+            }
+        });
     }
 
     public void updateToolbar(int height, int y) {

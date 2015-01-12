@@ -17,6 +17,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         </FrameLayout>
+        
+        <waka.techcast.views.widgets.MiniPodcastPlayerView
+            android:id="@+id/mini_player"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:visibility="gone"
+            >
+        </waka.techcast.views.widgets.MiniPodcastPlayerView>
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -58,15 +67,6 @@
                 android:textSize="@dimen/text_headline"
                 android:text="@string/app_name"
                 android:textColor="@color/theme_text_white"
-                />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_marginBottom="32dp"
-                android:textSize="@dimen/text_subhead"
-                android:textColor="@color/theme_text_white"
-                android:text="@string/app_description"
                 />
         </RelativeLayout>
         <ListView

@@ -30,6 +30,7 @@ import waka.techcast.enums.ChannelEnum;
 import waka.techcast.internal.di.Injector;
 import waka.techcast.internal.utils.DialogUtils;
 import waka.techcast.internal.utils.SharedPreferenceUtils;
+import waka.techcast.media.PodcastPlayer;
 import waka.techcast.models.Feed;
 import waka.techcast.models.Item;
 import waka.techcast.rx.DownloadSubject;
@@ -51,6 +52,9 @@ public class FeedListFragment extends Fragment {
 
     @Inject
     SharedPreferences sharedPreferences;
+
+    @Inject
+    PodcastPlayer podcastPlayer;
 
     @InjectView(R.id.feed_list)
     ListView feedListView;
@@ -96,12 +100,21 @@ public class FeedListFragment extends Fragment {
         setupListView();
         fetchFeed();
 
-        DownloadSubject.receive().subscribe(new Action1<Item>() {
-            @Override
-            public void call(Item item) {
-                feedListAdapter.notifyDataSetChanged();
-            }
-        });
+        DownloadSubject.receive()
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        if (!isAdded()) return;
+                        Toast.makeText(getActivity(), throwable.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                })
+                .subscribe(new Action1<Item>() {
+                    @Override
+                    public void call(Item item) {
+                        if (!isAdded()) return;
+                        feedListAdapter.notifyDataSetChanged();
+                    }
+                });
     }
 
     private void setupListView() {
@@ -160,6 +173,7 @@ public class FeedListFragment extends Fragment {
                 .doOnError(new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
+                        if (!isAdded()) return;
                         Toast.makeText(getActivity(), R.string.error_fetch_feed, Toast.LENGTH_LONG).show();
                     }
                 })
@@ -192,30 +206,40 @@ public class FeedListFragment extends Fragment {
         ((FeedListActivity) getActivity()).moveToDetail(item);
     }
 
-    private void handleItemToPlay(Item item) {
-        if (ItemStore.exists(getActivity(), item)) {
-            // play from cache
+    private void handleItemToPlay(final Item item) {
+        if (!ItemStore.exists(getActivity(), item) && SharedPreferenceUtils.shouldShowDialog(sharedPreferences)) {
+            MaterialDialog dialog = DialogUtils.createFirstStreamingDialog(getActivity(), item, new DialogUtils.DialogCallbacks() {
+                @Override
+                public void onConfirm() {
+                    if (!isAdded()) return;
+                    SharedPreferenceUtils.doneShowDialog(sharedPreferences);
+                    podcastPlayer.play(getActivity(), item);
+                }
+            });
+            dialog.show();
         } else {
-            if (SharedPreferenceUtils.shouldShowDialog(sharedPreferences)) {
-                MaterialDialog dialog = DialogUtils.createFirstStreamingDialog(getActivity(), item, new DialogUtils.DialogCallbacks() {
-                    @Override
-                    public void onConfirm() {
-
-                    }
-                });
-            } else {
-                // immediate play
-            }
+            // immediate play
+            podcastPlayer.play(getActivity(), item);
         }
     }
 
-    private void handleItemToDownload(Item item) {
+    private void handleItemToDownload(final Item item) {
         MaterialDialog dialog;
 
         if (DownloadService.isDownloading(item)) {
-            dialog = DialogUtils.createDownloadCancelDialog(getActivity(), item, null);
+            dialog = DialogUtils.createDownloadCancelDialog(getActivity(), item, new DialogUtils.DialogCallbacks() {
+                @Override
+                public void onConfirm() {
+                    DownloadService.cancel(getActivity(), item);
+                }
+            });
         } else {
-            dialog = DialogUtils.createDownloadDialog(getActivity(), item, null);
+            dialog = DialogUtils.createDownloadDialog(getActivity(), item, new DialogUtils.DialogCallbacks() {
+                @Override
+                public void onConfirm() {
+                    DownloadService.start(getActivity(), item);
+                }
+            });
         }
         dialog.show();
     }
@@ -224,7 +248,9 @@ public class FeedListFragment extends Fragment {
         MaterialDialog dialog = DialogUtils.createDownloadClearDialog(getActivity(), item, new DialogUtils.DialogCallbacks() {
             @Override
             public void onConfirm() {
-                feedListAdapter.notifyDataSetChanged();
+                if (ItemStore.delete(getActivity(), item)) {
+                    feedListAdapter.notifyDataSetChanged();
+                }
             }
         });
         dialog.show();

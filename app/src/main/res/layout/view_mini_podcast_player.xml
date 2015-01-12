@@ -1,0 +1,66 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:background="@drawable/shadow_above"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/keyline_horizontal_edge"
+        android:paddingRight="@dimen/keyline_horizontal_edge"
+        android:background="@color/theme_window_background"
+        android:orientation="horizontal"
+        >
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            >
+            <CheckBox
+                android:id="@+id/player_play_and_pause"
+                android:layout_width="@dimen/button_icon_size"
+                android:layout_height="@dimen/button_icon_size"
+                android:gravity="center"
+                android:button="@drawable/play_and_pause_checkbox"
+                />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            >
+            <ImageView
+                android:id="@+id/player_stop"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_stop_grey600_36dp"
+                android:contentDescription="@string/image_description"
+                />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/player_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="@dimen/spacing_vertical_offset_large"
+            android:layout_gravity="center_vertical"
+            android:textSize="@dimen/text_subhead"
+            android:textColor="@color/theme_text_secondary"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            tools:ignore="RtlHardcoded"
+            />
+    </LinearLayout>
+</LinearLayout>

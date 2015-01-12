@@ -33,6 +33,7 @@ public class ItemStore {
             return false;
         } finally {
             try {
+                if (inputStream != null) inputStream.close();
                 if (fileOutputStream != null) fileOutputStream.close();
                 if (bufferedInputStream != null) bufferedInputStream.close();
             } catch (IOException e) {

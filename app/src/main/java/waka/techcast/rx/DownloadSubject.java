@@ -12,6 +12,10 @@ public class DownloadSubject {
         subject.onNext(item);
     }
 
+    public static void fail() {
+        subject.onError(new Exception("ダウンロードに失敗しました"));
+    }
+
     public static Observable<Item> receive() {
         return subject.observeOn(AndroidSchedulers.mainThread());
     }
