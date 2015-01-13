@@ -5,6 +5,8 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.inject.Singleton;
 
@@ -22,6 +24,7 @@ public class PodcastPlayer extends MediaPlayer implements MediaPlayer.OnPrepared
 
     private Status status = Status.STOPPED;
     private Item playingItem;
+    private TickTimer tickTimer;
 
     public Item getPlayingItem() {
         return playingItem;
@@ -68,6 +71,10 @@ public class PodcastPlayer extends MediaPlayer implements MediaPlayer.OnPrepared
         super.start();
         status = Status.PLAYING;
 
+        if (tickTimer == null) {
+            tickTimer = new TickTimer();
+        }
+        tickTimer.start();
         PodcastPlayerSubject.play(playingItem);
     }
 
@@ -76,6 +83,7 @@ public class PodcastPlayer extends MediaPlayer implements MediaPlayer.OnPrepared
         super.pause();
         status = Status.PAUSED;
 
+        tickTimer.stop();
         PodcastPlayerSubject.pause(playingItem);
     }
 
@@ -86,7 +94,7 @@ public class PodcastPlayer extends MediaPlayer implements MediaPlayer.OnPrepared
         status = Status.STOPPED;
 
         playingItem = null;
-
+        tickTimer.cancel();
         PodcastPlayerSubject.stop();
     }
 
@@ -94,5 +102,32 @@ public class PodcastPlayer extends MediaPlayer implements MediaPlayer.OnPrepared
     public void onPrepared(MediaPlayer mediaPlayer) {
         start();
         status = Status.PLAYING;
+    }
+
+    private static class TickTimer extends Timer {
+        private int count = 0;
+        private boolean stopped;
+        private boolean isRunning = false;
+
+        public void start() {
+            stopped = false;
+            if (isRunning) return;
+
+            scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    if (!stopped) {
+                        count++;
+                        PodcastPlayerSubject.tick(count * 1000);
+                    }
+                }
+            }, 1000, 1000);
+
+            isRunning = true;
+        }
+
+        public void stop() {
+            stopped = true;
+        }
     }
 }

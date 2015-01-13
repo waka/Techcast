@@ -2,7 +2,6 @@ package waka.techcast.fragments;
 
 import android.os.Bundle;
 import android.app.Fragment;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import rx.Subscription;
 import rx.functions.Action1;
 import waka.techcast.R;
 import waka.techcast.activities.FeedDetailActivity;
@@ -69,6 +69,12 @@ public class FeedDetailFragment extends Fragment {
     @InjectView(R.id.show_notes)
     RelevantLinksView relevantLinksView;
 
+    private Subscription playSubscription;
+    private Subscription pauseSubscription;
+    private Subscription stopSubscription;
+    private Subscription tickSubscription;
+
+
     public static FeedDetailFragment newInstance(Item item) {
         FeedDetailFragment fragment = new FeedDetailFragment();
         Bundle args = new Bundle();
@@ -117,6 +123,15 @@ public class FeedDetailFragment extends Fragment {
         setupPlayer();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        playSubscription.unsubscribe();
+        pauseSubscription.unsubscribe();
+        stopSubscription.unsubscribe();
+        tickSubscription.unsubscribe();
+    }
+
     private void setupViews() {
         Item item = viewModel.getItem();
 
@@ -151,31 +166,6 @@ public class FeedDetailFragment extends Fragment {
                 }
             }
         });
-
-        PodcastPlayerSubject.receivePlayed().subscribe(new Action1<Item>() {
-            @Override
-            public void call(Item item) {
-                if (isAdded() && item.equals(currentItem)) {
-                    showPause();
-                }
-            }
-        });
-        PodcastPlayerSubject.receivePaused().subscribe(new Action1<Item>() {
-            @Override
-            public void call(Item item) {
-                if (isAdded() && item.equals(currentItem)) {
-                    showPlay();
-                }
-            }
-        });
-        PodcastPlayerSubject.receiveStopped().subscribe(new Action1<Void>() {
-            @Override
-            public void call(Void aVoid) {
-                if (isAdded()) {
-                    showPlay();
-                }
-            }
-        });
     }
 
     private void setupPlayer() {
@@ -190,6 +180,37 @@ public class FeedDetailFragment extends Fragment {
 
         updateElapsedTime(0);
         playerDurationTextView.setText(currentItem.getDuration());
+
+        playSubscription = PodcastPlayerSubject.receivePlayed().subscribe(new Action1<Item>() {
+            @Override
+            public void call(Item item) {
+                if (isAdded() && item.equals(currentItem)) {
+                    showPause();
+                }
+            }
+        });
+        pauseSubscription = PodcastPlayerSubject.receivePaused().subscribe(new Action1<Item>() {
+            @Override
+            public void call(Item item) {
+                if (isAdded() && item.equals(currentItem)) {
+                    showPlay();
+                }
+            }
+        });
+        stopSubscription = PodcastPlayerSubject.receiveStopped().subscribe(new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                if (isAdded()) {
+                    showPlay();
+                }
+            }
+        });
+        tickSubscription = PodcastPlayerSubject.receiveTicked().subscribe(new Action1<Integer>() {
+            @Override
+            public void call(Integer position) {
+                updateElapsedTime(position);
+            }
+        });
     }
 
     private void showPlay() {
