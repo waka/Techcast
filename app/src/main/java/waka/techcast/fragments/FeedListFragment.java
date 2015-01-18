@@ -22,6 +22,7 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import rx.android.observables.AndroidObservable;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import waka.techcast.R;
@@ -34,6 +35,7 @@ import waka.techcast.media.PodcastPlayer;
 import waka.techcast.models.Feed;
 import waka.techcast.models.Item;
 import waka.techcast.rx.DownloadSubject;
+import waka.techcast.rx.FeedListSubject;
 import waka.techcast.services.DownloadService;
 import waka.techcast.stores.ItemStore;
 import waka.techcast.view_models.FeedListViewModel;
@@ -85,6 +87,10 @@ public class FeedListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_feed_list, container, false);
         ButterKnife.inject(this, view);
+
+        setupViews();
+        setupSubjects();
+
         return view;
     }
 
@@ -97,27 +103,33 @@ public class FeedListFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        setupListView();
-        fetchFeed();
+        fetchFeed(false);
+    }
 
-        DownloadSubject.receive()
+    private void setupSubjects() {
+        AndroidObservable.bindFragment(this, FeedListSubject.receiveReloaded()).subscribe(new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                fetchFeed(true);
+            }
+        });
+
+        AndroidObservable.bindFragment(this, DownloadSubject.receive())
                 .doOnError(new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        if (!isAdded()) return;
                         Toast.makeText(getActivity(), throwable.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 })
                 .subscribe(new Action1<Item>() {
                     @Override
                     public void call(Item item) {
-                        if (!isAdded()) return;
                         feedListAdapter.notifyDataSetChanged();
                     }
                 });
     }
 
-    private void setupListView() {
+    private void setupViews() {
         List<Item> items = new ArrayList<>();
         feedListAdapter = new FeedListAdapter(getActivity(), items, new FeedListAdapter.OnClickListener() {
             @Override
@@ -157,13 +169,13 @@ public class FeedListFragment extends Fragment {
         });
     }
 
-    private void fetchFeed() {
+    private void fetchFeed(boolean refresh) {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         final int px = (int) (metrics.density * LOGO_IMAGE_DP);
 
         final ProgressDialog dialog = ProgressDialog.show(getActivity());
 
-        viewModel.getFeedList(getActivity())
+        viewModel.getFeedList(getActivity(), refresh)
                 .doOnTerminate(new Action0() {
                     @Override
                     public void call() {

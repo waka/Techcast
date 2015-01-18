@@ -40,9 +40,9 @@ public class FeedListViewModel {
         return feed;
     }
 
-    public Observable<Feed> getFeedList(Context context) {
+    public Observable<Feed> getFeedList(Context context, boolean refresh) {
         return client
-                .cache(context)
+                .cache(context, refresh)
                 .call(RequestBuilderUtils.get(channel.getUrl()))
                 .map(new FeedListFunc());
     }

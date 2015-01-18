@@ -15,7 +15,7 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import rx.Subscription;
+import rx.android.observables.AndroidObservable;
 import rx.functions.Action1;
 import waka.techcast.R;
 import waka.techcast.activities.FeedDetailActivity;
@@ -69,12 +69,6 @@ public class FeedDetailFragment extends Fragment {
     @InjectView(R.id.show_notes)
     RelevantLinksView relevantLinksView;
 
-    private Subscription playSubscription;
-    private Subscription pauseSubscription;
-    private Subscription stopSubscription;
-    private Subscription tickSubscription;
-
-
     public static FeedDetailFragment newInstance(Item item) {
         FeedDetailFragment fragment = new FeedDetailFragment();
         Bundle args = new Bundle();
@@ -101,6 +95,10 @@ public class FeedDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_feed_detail, container, false);
         ButterKnife.inject(this, view);
+
+        setupViews();
+        setupSubjects();
+
         return view;
     }
 
@@ -111,61 +109,82 @@ public class FeedDetailFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        setupViews();
-        setupEvents();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         setupPlayer();
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        playSubscription.unsubscribe();
-        pauseSubscription.unsubscribe();
-        stopSubscription.unsubscribe();
-        tickSubscription.unsubscribe();
-    }
-
     private void setupViews() {
-        Item item = viewModel.getItem();
+        Item currentItem = viewModel.getItem();
 
-        titleTextView.setText(item.getTitle());
+        titleTextView.setText(currentItem.getTitle());
         descriptionTextView.setText(
-                StringUtils.omitArticle(StringUtils.fromHtml(item.getSubTitle())));
-        relevantLinksView.addLinkView(item);
-
-        scrollView.scroll().subscribe(new Action1<ObservableScrollView.Scroller>() {
-            @Override
-            public void call(ObservableScrollView.Scroller scroller) {
-                int height = headerLayout.getHeight();
-                ((FeedDetailActivity) getActivity()).updateToolbar(height, scroller.y);
-            }
-        });
+                StringUtils.omitArticle(StringUtils.fromHtml(currentItem.getSubTitle())));
+        relevantLinksView.addLinkView(currentItem);
     }
 
-    private void setupEvents() {
+    private void setupSubjects() {
         final Item currentItem = viewModel.getItem();
 
-        ViewObservable.click(playerActionView).subscribe(new Action1<Void>() {
-            @Override
-            public void call(Void empty) {
-                if (podcastPlayer.isPlayingItem(currentItem)) {
-                    if (podcastPlayer.isPlaying()) {
-                        podcastPlayer.pause();
-                    } else {
-                        podcastPlayer.start();
+        AndroidObservable.bindFragment(this, ViewObservable.click(playerActionView))
+                .subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void empty) {
+                        if (podcastPlayer.isPlayingItem(currentItem)) {
+                            if (podcastPlayer.isPlaying()) {
+                                podcastPlayer.pause();
+                            } else {
+                                podcastPlayer.start();
+                            }
+                        } else {
+                            podcastPlayer.play(getActivity(), currentItem);
+                        }
                     }
-                } else {
-                    podcastPlayer.play(getActivity(), currentItem);
-                }
-            }
-        });
+                });
+
+        AndroidObservable.bindFragment(this, scrollView.scroll())
+                .subscribe(new Action1<ObservableScrollView.Scroller>() {
+                    @Override
+                    public void call(ObservableScrollView.Scroller scroller) {
+                        int height = headerLayout.getHeight();
+                        ((FeedDetailActivity) getActivity()).updateToolbar(height, scroller.y);
+                    }
+                });
+
+        AndroidObservable.bindFragment(this, PodcastPlayerSubject.receivePlayed())
+                .subscribe(new Action1<Item>() {
+                    @Override
+                    public void call(Item item) {
+                        if (item.equals(currentItem)) {
+                            showPause();
+                        }
+                    }
+                });
+        AndroidObservable.bindFragment(this, PodcastPlayerSubject.receivePaused())
+                .subscribe(new Action1<Item>() {
+                    @Override
+                    public void call(Item item) {
+                        if (isAdded() && item.equals(currentItem)) {
+                            showPlay();
+                        }
+                    }
+                });
+        AndroidObservable.bindFragment(this, PodcastPlayerSubject.receiveStopped())
+                .subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        if (isAdded()) {
+                            showPlay();
+                        }
+                    }
+                });
+        AndroidObservable.bindFragment(this, PodcastPlayerSubject.receiveTicked())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer position) {
+                        updateElapsedTime(position);
+                    }
+                });
     }
 
     private void setupPlayer() {
@@ -180,37 +199,6 @@ public class FeedDetailFragment extends Fragment {
 
         updateElapsedTime(0);
         playerDurationTextView.setText(currentItem.getDuration());
-
-        playSubscription = PodcastPlayerSubject.receivePlayed().subscribe(new Action1<Item>() {
-            @Override
-            public void call(Item item) {
-                if (isAdded() && item.equals(currentItem)) {
-                    showPause();
-                }
-            }
-        });
-        pauseSubscription = PodcastPlayerSubject.receivePaused().subscribe(new Action1<Item>() {
-            @Override
-            public void call(Item item) {
-                if (isAdded() && item.equals(currentItem)) {
-                    showPlay();
-                }
-            }
-        });
-        stopSubscription = PodcastPlayerSubject.receiveStopped().subscribe(new Action1<Void>() {
-            @Override
-            public void call(Void aVoid) {
-                if (isAdded()) {
-                    showPlay();
-                }
-            }
-        });
-        tickSubscription = PodcastPlayerSubject.receiveTicked().subscribe(new Action1<Integer>() {
-            @Override
-            public void call(Integer position) {
-                updateElapsedTime(position);
-            }
-        });
     }
 
     private void showPlay() {

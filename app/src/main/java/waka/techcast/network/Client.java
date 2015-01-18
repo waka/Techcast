@@ -55,7 +55,9 @@ public class Client {
                 .observeOn(Schedulers.newThread());
     }
 
-    public Client cache(Context context) {
+    public Client cache(Context context, boolean refresh) {
+        if (refresh) return this;
+
         File cacheDir = new File(context.getCacheDir(), "techcast_http_cache");
         Cache cache;
         try {

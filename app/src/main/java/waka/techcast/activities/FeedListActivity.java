@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
+import rx.android.observables.AndroidObservable;
 import rx.functions.Action1;
 import waka.techcast.R;
 import waka.techcast.enums.ChannelEnum;
@@ -26,6 +27,7 @@ import waka.techcast.fragments.FeedListFragment;
 import waka.techcast.internal.di.Injector;
 import waka.techcast.media.PodcastPlayer;
 import waka.techcast.models.Item;
+import waka.techcast.rx.FeedListSubject;
 import waka.techcast.rx.PodcastPlayerSubject;
 import waka.techcast.views.adapters.DrawerListAdapter;
 import waka.techcast.views.widgets.DrawerToggle;
@@ -66,6 +68,7 @@ public class FeedListActivity extends ActionBarActivity {
         setupToolbar();
         setupMiniPodcastPlayer();
         setupDrawerLayout();
+        setupSubjects();
 
         if (savedInstanceState == null) {
            getFragmentManager().beginTransaction()
@@ -83,6 +86,46 @@ public class FeedListActivity extends ActionBarActivity {
         } else {
             miniPodcastPlayerView.hide();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        ButterKnife.reset(this);
+        super.onDestroy();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_feed_list, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.action_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            case R.id.action_reload:
+                FeedListSubject.reload();
+                break;
+        }
+
+        return drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        drawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
     }
 
     private void setupToolbar() {
@@ -107,27 +150,31 @@ public class FeedListActivity extends ActionBarActivity {
                 moveToDetail(item);
             }
         });
+    }
 
-        // publish from notification
-        PodcastPlayerSubject.receivePlayed().subscribe(new Action1<Item>() {
-            @Override
-            public void call(Item item) {
-                miniPodcastPlayerView.setPlayAndPauseCheckbox(true);
-                miniPodcastPlayerView.show();
-            }
-        });
-        PodcastPlayerSubject.receivePaused().subscribe(new Action1<Item>() {
-            @Override
-            public void call(Item item) {
-                miniPodcastPlayerView.setPlayAndPauseCheckbox(false);
-            }
-        });
-        PodcastPlayerSubject.receiveStopped().subscribe(new Action1<Void>() {
-            @Override
-            public void call(Void empty) {
-                miniPodcastPlayerView.hide();
-            }
-        });
+    private void setupSubjects() {
+        AndroidObservable.bindActivity(this, PodcastPlayerSubject.receivePlayed())
+                .subscribe(new Action1<Item>() {
+                    @Override
+                    public void call(Item item) {
+                        miniPodcastPlayerView.setPlayAndPauseCheckbox(true);
+                        miniPodcastPlayerView.show();
+                    }
+                });
+        AndroidObservable.bindActivity(this, PodcastPlayerSubject.receivePaused())
+                .subscribe(new Action1<Item>() {
+                    @Override
+                    public void call(Item item) {
+                        miniPodcastPlayerView.setPlayAndPauseCheckbox(false);
+                    }
+                });
+        AndroidObservable.bindActivity(this, PodcastPlayerSubject.receiveStopped())
+                .subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void empty) {
+                        miniPodcastPlayerView.hide();
+                    }
+                });
     }
 
     public void updateToolbar(int height, int y) {
@@ -152,43 +199,6 @@ public class FeedListActivity extends ActionBarActivity {
         drawerListView.setAdapter(new DrawerListAdapter(this, ChannelEnum.toList()));
         drawerToggle = new DrawerToggle(this, drawerLayout, toolbar);
         drawerToggle.setDrawerIndicatorEnabled(true);
-    }
-
-    @Override
-    public void onDestroy() {
-        ButterKnife.reset(this);
-        super.onDestroy();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_feed_list, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        }
-
-        return drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        drawerToggle.syncState();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        drawerToggle.onConfigurationChanged(newConfig);
     }
 
     @OnItemClick(R.id.drawer_list)

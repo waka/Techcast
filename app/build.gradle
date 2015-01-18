@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.android.tools.build:gradle:1.0.1'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
         //noinspection GradleDynamicVersion
         classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.+'
@@ -60,6 +60,7 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (secretFile.exists()) {
+                //noinspection GroovyAssignabilityCheck
                 signingConfig signingConfigs.release
             }
         }
